@@ -1,0 +1,15 @@
+# Exclude folders
+/debug/
+/emu/
+
+# Exclude system files
+.DS_Store
+Thumbs.db
+
+# Exclude log files
+*.log
+
+# Exclude environment/config files
+.env
+hotwire.conf
+# NEVER add hotwire.conf as it's a config file meant to override default compiler instructions/structure for debugging, it should never be used for production releases!

@@ -1,0 +1,5 @@
+RMLL:
+  type: programming
+  color: "#8a2be2"
+  extensions:
+    - ".rmll"
