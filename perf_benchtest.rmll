@@ -1,0 +1,85 @@
+:::DISABLE_INT_CACHE
+:::CONDITIONAL_LOAD rundata.cpuarch 'x86_64' utf8
+:::CONDITIONAL_LOAD rundata.cpuarch 'lpp_exp' adv_charset12
+:::LOAD adv_math
+
+## Lang version is RMLL Alpha-8
+const.VER = 'v0.03'
+reg float16 var._
+reg int24 var.score
+
+reg function textout NONE STRING(input){
+	if.equal rundata.cpuarch 'x86_64'
+	+ printl(input, UTF8)
+	+ return nil
+	if.equal rundata.cpuarch 'lpp_exp'
+	+ printl(input, chrset12)
+	+ return nil
+	EXIT(71, 'Unsupported platform')
+}
+
+reg function cpu_simplecalc INT NONE{
+	var.score = 0
+	var.time_start = rundata.currentRuntime
+	::funcloop
+	if.compare time_start time_start+1000000
+		+ var.score ADD 1
+		- goto funcloop
+	return score
+	}
+
+reg function cpu_complexcalc INT NONE{
+	var.score = 0
+	var.time_start = rundata.currentRuntime
+	::funcloop
+	if.compare time_start time_start+1000000
+		+ var.score ADD 1
+		- var._ = 913 + 9311
+		- var._ = 53 - 21
+		- var._ = 0 * 5
+		- var._ = 7 * 9
+		- var._ = 91 DIVIDE 1339
+		- var._ = 901 DIVIDE 199831
+		- var._ = adv_math.sin(17.1)
+		- var._ = adv_math.sin(61.1)
+		- var._ = adv_math.cos(37)
+		- var._ = adv_math.cos(62)
+		- var._ = adv_math.exponent(7, 31)
+		- var._ = adv_math.exponent(7, 128)
+		- goto funcloop
+	return score
+	}
+
+main{
+	## Keep the repeated format till we confirm the compiler handles the entire code properly!
+	## In 'main' instead of 'if' use 'ifse' for condition checking which sets IFX's third and fourth bits instead which sets conditional execution for ++ and -- prefixes.
+
+	textout('Simple Math Performance Scores')
+	textout('Simple Addition per second')
+	var.simple_score_1 = CALL(cpu_simplecalc)
+	textout(simple_score_1)
+	var.simple_score_2 = CALL(cpu_simplecalc)
+	textout(simple_score_2)
+	var.simple_score_3 = CALL(cpu_simplecalc)
+	textout(simple_score_3)
+	var.simple_score_4 = CALL(cpu_simplecalc)
+	textout(simple_score_4)
+	textout('  ')
+
+	textout('Complex Math Performance Scores')
+	textout('Operation-set complete per second')
+	var.complex_score_1 = CALL(cpu_complexcalc)
+	textout(complex_score_1)
+	var.complex_score_2 = CALL(cpu_complexcalc)
+	textout(complex_score_2)
+	var.complex_score_3 = CALL(cpu_complexcalc)
+	textout(complex_score_3)
+	var.complex_score_4 = CALL(cpu_complexcalc)
+	textout(complex_score_4)
+
+}
+
+## Todo: Add performance & instruction test for both mGPUs (On lpp)
+## Note: x86_64 support are incomplete on the compiler-side and development on it halted indefinitely in favor of making the lpp low-level emulator and lpp-compiler in publishable quicker, RISC-V support currently not started but is higher priority than x86_64. (See notes on compiler source for more information)
+## Note: Once RAM performance test is added RESERVE DYNAMIC should be used for x86_64 and RESERVE EXACT for lpp
+## Note: For lpp: Don't try to reserve addresses between 0x00 to 0x1000 (Mainboard Controller reserved), 0x100000 to 0x1C0000 (Used by renderer mGPU) and 0xC00000 to 0xFFFFFF (RMLL runtime in central RAM)
