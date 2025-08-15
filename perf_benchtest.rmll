@@ -3,8 +3,8 @@
 :::CONDITIONAL_LOAD rundata.cpuarch 'lpp_exp' adv_charset12
 :::LOAD adv_math
 
-## Lang version is RMLL Alpha-8
-const.VER = 'v0.03'
+## Lang version is RMLL Alpha-9
+const.VER = 'v0.03b'
 reg float16 var._
 reg int24 var.score
 
