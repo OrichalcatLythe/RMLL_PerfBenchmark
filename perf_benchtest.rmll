@@ -3,12 +3,16 @@
 :::CONDITIONAL_LOAD rundata.cpuarch 'lpp_exp' adv_charset12
 :::LOAD adv_math
 
-## Lang version is RMLL Alpha-9
-const.VER = 'v0.03b'
-reg float16 var._
-reg int24 var.score
+## Lang version is RMLL Alpha-11
+## reg.var/etc changed in language to CREATE var to avoid confusion with registers, reg now manipulates registers
+const.VER = 'v0.04'
+CREATE var._ float16
+CREATE var.score int24
+CREATE var.loopcounter int8
 
-reg function textout NONE STRING(input){
+## Never use another function in a function, in RMLL functions are just quick access of jumping to instructions and setting EAX before returning to the memorized original position, with the returned value in EAX
+
+create function textout NONE STRING(input){
 	if.equal rundata.cpuarch 'x86_64'
 	+ printl(input, UTF8)
 	+ return nil
@@ -18,7 +22,7 @@ reg function textout NONE STRING(input){
 	EXIT(71, 'Unsupported platform')
 }
 
-reg function cpu_simplecalc INT NONE{
+create function cpu_simplecalc INT NONE{
 	var.score = 0
 	var.time_start = rundata.currentRuntime
 	::funcloop
@@ -28,7 +32,7 @@ reg function cpu_simplecalc INT NONE{
 	return score
 	}
 
-reg function cpu_complexcalc INT NONE{
+create function cpu_complexcalc INT NONE{
 	var.score = 0
 	var.time_start = rundata.currentRuntime
 	::funcloop
@@ -54,28 +58,29 @@ main{
 	## Keep the repeated format till we confirm the compiler handles the entire code properly!
 	## In 'main' instead of 'if' use 'ifse' for condition checking which sets IFX's third and fourth bits instead which sets conditional execution for ++ and -- prefixes.
 
+	var.loopcounter = 0
 	textout('Simple Math Performance Scores')
 	textout('Simple Addition per second')
-	var.simple_score_1 = CALL(cpu_simplecalc)
-	textout(simple_score_1)
-	var.simple_score_2 = CALL(cpu_simplecalc)
-	textout(simple_score_2)
-	var.simple_score_3 = CALL(cpu_simplecalc)
-	textout(simple_score_3)
-	var.simple_score_4 = CALL(cpu_simplecalc)
-	textout(simple_score_4)
+
+	::sscore_loop
+	ifse.equal var.loopcounter 5
+	-- var.score = CALL(cpu_simplecalc)
+	-- textout(var.score)
+	-- var.loopcounter ADD 1
+	-- goto sscore_loop
 	textout('  ')
 
+	var.loopcounter = 0
 	textout('Complex Math Performance Scores')
 	textout('Operation-set complete per second')
-	var.complex_score_1 = CALL(cpu_complexcalc)
-	textout(complex_score_1)
-	var.complex_score_2 = CALL(cpu_complexcalc)
-	textout(complex_score_2)
-	var.complex_score_3 = CALL(cpu_complexcalc)
-	textout(complex_score_3)
-	var.complex_score_4 = CALL(cpu_complexcalc)
-	textout(complex_score_4)
+
+	::cscore_loop
+	ifse.equal var.loopcounter 5
+	-- var.score = CALL(cpu_complexcalc)
+	-- textout(var.score)
+	-- var.loopcounter ADD 1
+	-- goto cscore_loop
+	textout('  ')
 
 }
 
